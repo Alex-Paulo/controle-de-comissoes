@@ -1,0 +1,292 @@
+/* Importando uma fonte moderna do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Paleta de Cores do Sistema */
+:root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --success: #10b981;
+    --success-hover: #059669;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --background: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    /* Mantendo sua imagem, mas com uma cor de fundo reserva */
+    background: var(--background) url("fab.jpg") no-repeat center center fixed;
+    background-size: cover;
+    color: var(--text-main);
+    padding: 40px 20px;
+    line-height: 1.6;
+}
+
+/* Dashboard - Cards lado a lado (Tamanho Reduzido) */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 15px; /* Espaçamento interno menor */
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* Sombra mais delicada */
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+    font-size: 0.8rem; /* Fonte do título menor */
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.card p {
+    font-size: 1.8rem; /* Número bem menor e mais elegante */
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+/* Estilos do Formulário */
+.form {
+    background: var(--background);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 30px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+#membrosContainer input {
+    margin-bottom: 10px;
+}
+
+/* Botões */
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+button[onclick="adicionarMembro()"] {
+    background: #e2e8f0;
+    color: var(--text-main);
+    margin-bottom: 15px;
+    width: auto;
+}
+
+button[onclick="adicionarMembro()"]:hover {
+    background: #cbd5e1;
+}
+
+button[onclick="salvarComissao()"] {
+    background: var(--primary);
+    color: white;
+    width: 100%;
+    font-size: 1.05rem;
+    padding: 14px;
+    margin-top: 10px;
+}
+
+button[onclick="salvarComissao()"]:hover {
+    background: var(--primary-hover);
+}
+
+button[onclick="exportarExcel()"] {
+    background: var(--success);
+    color: white;
+    margin-bottom: 20px;
+}
+
+button[onclick="exportarExcel()"]:hover {
+    background: var(--success-hover);
+}
+
+/* Alinhamento da Busca e Botão Exportar */
+#filtro {
+    max-width: 400px;
+    display: inline-block;
+    margin-right: 15px;
+}
+
+/* Estilos da Tabela */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 15px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+td {
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.acoes {
+    white-space: nowrap;
+}
+
+.btn-editar, .btn-excluir {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    margin-right: 5px;
+}
+
+.btn-editar {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-editar:hover {
+    background: var(--primary-hover);
+}
+
+.btn-excluir {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-excluir:hover {
+    background: var(--danger-hover);
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+}
+
+/* --- TELA DE LOGIN --- */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-box h2 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    border: none;
+    font-size: 1.8rem;
+}
+
+.login-box p {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+/* --- RODAPÉ --- */
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 400;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.5px;
+}

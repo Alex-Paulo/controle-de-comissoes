@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Controle de Comissões</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h2>Acesso Restrito</h2>
+            <p>Insira a senha para acessar o sistema</p>
+            <input type="password" id="senhaLogin" placeholder="Digite a senha">
+            <button onclick="fazerLogin()">Entrar</button>
+            <p id="erroLogin" style="color: var(--danger); display: none; margin-top: 10px; font-size: 0.9rem;">Senha incorreta!</p>
+            
+            <div class="login-footer">
+                <p>Sistema criado por <br><strong>3s QScon Alex Moreira</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="appContent" style="display: none;">
+        <div class="container">
+
+            <h1>Controle de Comissões</h1>
+
+            <div class="dashboard">
+                <div class="card">
+                    <h3>Total de Comissões</h3>
+                    <p id="totalComissoes">0</p>
+                </div>
+                <div class="card">
+                    <h3>Total de Fiscais</h3>
+                    <p id="totalFiscais">0</p>
+                </div>
+                <div class="card">
+                    <h3>Total de Membros</h3>
+                    <p id="totalMembros">0</p>
+                </div>
+            </div>
+
+            <div class="form">
+                <input type="text" id="nomeComissao" placeholder="Nome da Comissão">
+                <input type="text" id="fiscal" placeholder="Fiscal Titular">
+                <input type="text" id="fiscalSubstituto" placeholder="Fiscal Substituto (Opcional)">
+                <label>Membros</label>
+                <div id="membrosContainer">
+                    <input type="text" class="membro" placeholder="Membro">
+                </div>
+                <button type="button" onclick="adicionarMembro()">+ Adicionar membro</button>
+                <textarea id="observacao" placeholder="Observações"></textarea>
+                <button onclick="salvarComissao()">Salvar Comissão</button>
+            </div>
+
+            <hr>
+
+            <h2>Buscar</h2>
+            <input type="text" id="filtro" placeholder="Buscar por comissão, fiscal ou membro" onkeyup="filtrar()">
+            <button onclick="exportarExcel()">Exportar para Excel</button>
+
+            <h2>Comissões cadastradas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Comissão</th>
+                        <th>Fiscal</th>
+                        <th>Substituto</th>
+                        <th>Membros</th>
+                        <th>Observação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="listaComissoes"></tbody>
+            </table>
+
+        </div>
+
+        <footer>
+            <p>Sistema criado por <strong>3s QScon Alex Moreira</strong></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
