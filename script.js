@@ -1,5 +1,5 @@
 // --- SISTEMA DE LOGIN ---
-const SENHA_SISTEMA = "1234"; // <-- ALTERE SUA SENHA AQUI
+const SENHA_SISTEMA = "270326"; // <-- ALTERE SUA SENHA AQUI
 
 // Verifica se já fez login nesta sessão
 if (sessionStorage.getItem("logado") === "true") {
