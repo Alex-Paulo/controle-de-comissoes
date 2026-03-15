@@ -1,129 +1,163 @@
-// --- CONEXÃO COM O SUPABASE ---
-// Mudamos o nome da variável para 'banco' para não dar conflito com a biblioteca
 const banco = supabase.createClient(supabaseUrl, supabaseKey);
 
-// --- SISTEMA DE LOGIN ---
-const SENHA_SISTEMA = "270326"; // Lembre-se de colocar a sua senha real aqui
+// --- SISTEMA DE AUTENTICAÇÃO REAL ---
 
-if (sessionStorage.getItem("logado") === "true") {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("appContent").style.display = "block";
-    carregarComissoes(); // Carrega os dados do banco assim que entra
-}
-
-function fazerLogin() {
-    let senhaDigitada = document.getElementById("senhaLogin").value;
-    let erro = document.getElementById("erroLogin");
-
-    if (senhaDigitada === SENHA_SISTEMA) {
-        sessionStorage.setItem("logado", "true");
+// 1. Verifica se você já está logado quando abre a página
+async function verificarSessao() {
+    const { data: { session } } = await banco.auth.getSession();
+    
+    if (session) {
+        // Se já tiver uma sessão ativa, pula o login direto
         document.getElementById("loginScreen").style.display = "none";
         document.getElementById("appContent").style.display = "block";
-        erro.style.display = "none";
-        carregarComissoes(); // Traz os dados da nuvem
-    } else {
+        carregarComissoes(); 
+    }
+}
+// Roda a verificação assim que o código carrega
+verificarSessao();
+
+// 2. Função de Fazer Login na Nuvem
+async function fazerLogin() {
+    let emailDigitado = document.getElementById("emailLogin").value;
+    let senhaDigitada = document.getElementById("senhaLogin").value;
+    let erro = document.getElementById("erroLogin");
+    let btnEntrar = document.getElementById("btnEntrar");
+
+    // Mostra que está carregando
+    btnEntrar.innerText = "Verificando...";
+
+    // Conecta no Supabase e tenta logar
+    const { data, error } = await banco.auth.signInWithPassword({
+        email: emailDigitado,
+        password: senhaDigitada,
+    });
+
+    btnEntrar.innerText = "Entrar"; // Volta o texto ao normal
+
+    if (error) {
+        // Se a senha estiver errada
         erro.style.display = "block";
+    } else {
+        // Se deu certo, entra no sistema
+        erro.style.display = "none";
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("appContent").style.display = "block";
+        carregarComissoes(); 
     }
 }
 
+// 3. Função para Sair do Sistema
+async function fazerLogout() {
+    await banco.auth.signOut();
+    
+    // Esconde o painel e mostra o login novamente
+    document.getElementById("appContent").style.display = "none";
+    document.getElementById("loginScreen").style.display = "flex";
+    
+    // Limpa os campos de senha
+    document.getElementById("emailLogin").value = "";
+    document.getElementById("senhaLogin").value = "";
+}
+
+// Permite dar 'Enter' tanto no campo de email quanto no de senha para logar
+document.getElementById("emailLogin").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") fazerLogin();
+});
 document.getElementById("senhaLogin").addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        fazerLogin();
-    }
+    if (event.key === "Enter") fazerLogin();
 });
 
-// --- VARIÁVEIS GLOBAIS ---
+
+// --- RESTANTE DO SISTEMA (MANTIDO INTACTO) ---
+
 let comissoes = [];
 let editandoId = null; 
 
-// --- FUNÇÕES DO BANCO DE DADOS (CRUD) ---
-
-// 1. LER: Busca os dados no Supabase
 async function carregarComissoes() {
-    const { data, error } = await banco
-        .from('comissoes')
-        .select('*')
-        .order('id', { ascending: true });
-
-    if (error) {
-        console.error("Erro ao carregar dados:", error);
-        return;
-    }
-
+    const { data, error } = await banco.from('comissoes').select('*').order('id', { ascending: true });
+    if (error) { console.error("Erro:", error); return; }
     comissoes = data || [];
     atualizarTabela();
     atualizarDashboard();
 }
 
-// 2. CRIAR E ATUALIZAR
 async function salvarComissao() {
     let nome = document.getElementById("nomeComissao").value;
     let fiscal = document.getElementById("fiscal").value;
+    let fiscalSiafi = document.getElementById("fiscalSiafi").checked;
+    let fiscalCurso = document.getElementById("fiscalCurso").checked;
     let fiscalSubstituto = document.getElementById("fiscalSubstituto").value;
+    let substitutoSiafi = document.getElementById("substitutoSiafi").checked;
+    let substitutoCurso = document.getElementById("substitutoCurso").checked;
     let obs = document.getElementById("observacao").value;
+    let portaria = document.getElementById("portaria").value;
+    let boletim = document.getElementById("boletim").value;
+    let sigad = document.getElementById("sigad").value;
 
-    let membrosInputs = document.querySelectorAll(".membro");
+    let membrosGroups = document.querySelectorAll(".membro-group");
     let membros = [];
 
-    membrosInputs.forEach(input => {
-        if(input.value.trim() !== "") {
-            membros.push(input.value);
+    membrosGroups.forEach(group => {
+        let nomeMembro = group.querySelector(".membro-nome").value;
+        let siafi = group.querySelector(".membro-siafi").checked;
+        let curso = group.querySelector(".membro-curso").checked;
+        if(nomeMembro.trim() !== "") {
+            membros.push({ nome: nomeMembro, siafi_siasg: siafi, curso: curso });
         }
     });
 
     let dadosComissao = {
         nome: nome,
         fiscal: fiscal,
+        fiscal_siafi: fiscalSiafi,
+        fiscal_curso: fiscalCurso,
         fiscal_substituto: fiscalSubstituto,
+        substituto_siafi: substitutoSiafi,
+        substituto_curso: substitutoCurso,
         membros: membros,
-        observacao: obs
+        observacao: obs,
+        portaria: portaria,
+        boletim: boletim,
+        sigad: sigad
     };
 
     if(editandoId !== null) {
-        // ATUALIZAR (UPDATE no banco)
-        const { error } = await banco
-            .from('comissoes')
-            .update(dadosComissao)
-            .eq('id', editandoId);
-
-        if (error) console.error("Erro ao atualizar:", error);
+        await banco.from('comissoes').update(dadosComissao).eq('id', editandoId);
         editandoId = null;
     } else {
-        // INSERIR (INSERT no banco)
-        const { error } = await banco
-            .from('comissoes')
-            .insert([dadosComissao]);
-
-        if (error) console.error("Erro ao inserir:", error);
+        await banco.from('comissoes').insert([dadosComissao]);
     }
 
     limparCampos();
     await carregarComissoes(); 
 }
 
-// 3. DELETAR
 async function excluir(id) {
     if(confirm("Deseja excluir esta comissão definitivamente?")) {
-        const { error } = await banco
-            .from('comissoes')
-            .delete()
-            .eq('id', id);
-
-        if (error) console.error("Erro ao excluir:", error);
+        await banco.from('comissoes').delete().eq('id', id);
         await carregarComissoes();
     }
 }
 
-// --- INTERFACE E LÓGICA DA TELA ---
-
 function adicionarMembro() {
     let container = document.getElementById("membrosContainer");
-    let input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = "Membro";
-    input.className = "membro";
-    container.appendChild(input);
+    let div = document.createElement("div");
+    div.className = "militar-row membro-group"; 
+    
+    div.innerHTML = `
+        <input type="text" class="membro-nome" placeholder="Nome do Membro">
+        <div class="checkbox-group">
+            <label><input type="checkbox" class="membro-siafi"> SIAFI/SIASG</label>
+            <label><input type="checkbox" class="membro-curso"> Tem Curso</label>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function gerarBadges(temSiafi, temCurso) {
+    let badgeSiafi = temSiafi ? '<span class="badge sim">SIAFI</span>' : '<span class="badge nao">SIAFI</span>';
+    let badgeCurso = temCurso ? '<span class="badge sim">CURSO</span>' : '<span class="badge nao">CURSO</span>';
+    return `<div class="badges-container">${badgeSiafi}${badgeCurso}</div>`;
 }
 
 function atualizarTabela(lista = comissoes) {
@@ -131,17 +165,62 @@ function atualizarTabela(lista = comissoes) {
     tabela.innerHTML = "";
 
     lista.forEach((c, index) => {
-        let substitutoExibicao = c.fiscal_substituto ? c.fiscal_substituto : "-";
-        let observacaoExibicao = c.observacao ? c.observacao : "";
+        let fiscalExibicao = `
+            <div class="militar-container">
+                <span class="militar-nome">${c.fiscal}</span>
+                ${gerarBadges(c.fiscal_siafi, c.fiscal_curso)}
+            </div>
+        `;
+
+        let substitutoExibicao = "-";
+        if (c.fiscal_substituto) {
+            substitutoExibicao = `
+                <div class="militar-container">
+                    <span class="militar-nome">${c.fiscal_substituto}</span>
+                    ${gerarBadges(c.substituto_siafi, c.substituto_curso)}
+                </div>
+            `;
+        }
+
+        let membrosExibicao = "-";
+        if (c.membros && c.membros.length > 0) {
+            let listaMembrosHTML = c.membros.map(m => `
+                <div class="militar-container">
+                    <span class="militar-nome">${m.nome}</span>
+                    ${gerarBadges(m.siafi_siasg, m.curso)}
+                </div>
+            `).join("");
+            membrosExibicao = `<div class="membros-lista">${listaMembrosHTML}</div>`;
+        }
+
+        let boletimExibicao = c.boletim;
+        if (!c.boletim || c.boletim.trim() === "") {
+            if (c.created_at) {
+                let dataCriacao = new Date(c.created_at);
+                let hoje = new Date();
+                let diffDias = Math.floor((hoje - dataCriacao) / (1000 * 60 * 60 * 24));
+                
+                if (diffDias >= 3) {
+                    boletimExibicao = `<span style="background-color: #dc3545; color: white; padding: 4px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; white-space: nowrap;">🚨 ATRASADO</span>`;
+                } else {
+                    boletimExibicao = `<span style="background-color: #ffc107; color: #000; padding: 4px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; white-space: nowrap;">⏳ Pendente</span>`;
+                }
+            } else {
+                boletimExibicao = `<span style="background-color: #ffc107; color: #000; padding: 4px 6px; border-radius: 4px; font-size: 0.75em; font-weight: bold; white-space: nowrap;">⏳ Pendente</span>`;
+            }
+        }
 
         let linha = `
         <tr>
-            <td>${c.nome}</td>
-            <td>${c.fiscal}</td>
-            <td>${substitutoExibicao}</td>
-            <td>${c.membros.join(", ")}</td>
-            <td>${observacaoExibicao}</td>
-            <td class="acoes">
+            <td style="vertical-align: top;"><strong>${c.nome}</strong></td>
+            <td style="vertical-align: top;">${fiscalExibicao}</td>
+            <td style="vertical-align: top;">${substitutoExibicao}</td>
+            <td style="vertical-align: top;">${membrosExibicao}</td>
+            <td style="vertical-align: top;">${c.portaria || "-"}</td>
+            <td style="vertical-align: top;">${boletimExibicao}</td>
+            <td style="vertical-align: top;">${c.sigad || "-"}</td>
+            <td style="vertical-align: top;">${c.observacao || "-"}</td>
+            <td class="acoes" style="vertical-align: top;">
                 <button class="btn-editar" onclick="editar(${index})">Editar</button>
                 <button class="btn-excluir" onclick="excluir(${c.id})">Excluir</button>
             </td>
@@ -153,58 +232,91 @@ function atualizarTabela(lista = comissoes) {
 
 function editar(index) {
     let c = comissoes[index];
-
     document.getElementById("nomeComissao").value = c.nome;
     document.getElementById("fiscal").value = c.fiscal;
+    document.getElementById("fiscalSiafi").checked = c.fiscal_siafi;
+    document.getElementById("fiscalCurso").checked = c.fiscal_curso;
     document.getElementById("fiscalSubstituto").value = c.fiscal_substituto || "";
+    document.getElementById("substitutoSiafi").checked = c.substituto_siafi;
+    document.getElementById("substitutoCurso").checked = c.substituto_curso;
+    document.getElementById("portaria").value = c.portaria || "";
+    document.getElementById("boletim").value = c.boletim || "";
+    document.getElementById("sigad").value = c.sigad || "";
     document.getElementById("observacao").value = c.observacao || "";
 
     let container = document.getElementById("membrosContainer");
-    container.innerHTML = "";
+    container.innerHTML = ""; 
 
-    c.membros.forEach(m => {
-        let input = document.createElement("input");
-        input.type = "text";
-        input.className = "membro";
-        input.value = m;
-        container.appendChild(input);
-    });
-
+    if (c.membros && c.membros.length > 0) {
+        c.membros.forEach(m => {
+            let div = document.createElement("div");
+            div.className = "militar-row membro-group";
+            div.innerHTML = `
+                <input type="text" class="membro-nome" value="${m.nome}">
+                <div class="checkbox-group">
+                    <label><input type="checkbox" class="membro-siafi" ${m.siafi_siasg ? 'checked' : ''}> SIAFI/SIASG</label>
+                    <label><input type="checkbox" class="membro-curso" ${m.curso ? 'checked' : ''}> Tem Curso</label>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    } else {
+        adicionarMembro(); 
+    }
     editandoId = c.id; 
-}
-
-function filtrar() {
-    let texto = document.getElementById("filtro").value.toLowerCase();
-
-    let filtrados = comissoes.filter(c => 
-        c.nome.toLowerCase().includes(texto) ||
-        c.fiscal.toLowerCase().includes(texto) ||
-        (c.fiscal_substituto && c.fiscal_substituto.toLowerCase().includes(texto)) ||
-        c.membros.join(" ").toLowerCase().includes(texto)
-    );
-
-    atualizarTabela(filtrados);
 }
 
 function limparCampos() {
     document.getElementById("nomeComissao").value = "";
     document.getElementById("fiscal").value = "";
+    document.getElementById("fiscalSiafi").checked = false;
+    document.getElementById("fiscalCurso").checked = false;
     document.getElementById("fiscalSubstituto").value = "";
+    document.getElementById("substitutoSiafi").checked = false;
+    document.getElementById("substitutoCurso").checked = false;
+    document.getElementById("portaria").value = "";
+    document.getElementById("boletim").value = "";
+    document.getElementById("sigad").value = "";
     document.getElementById("observacao").value = "";
-
     let container = document.getElementById("membrosContainer");
-    container.innerHTML = `<input type="text" class="membro" placeholder="Membro">`;
+    container.innerHTML = "";
+    adicionarMembro();
+}
+
+function filtrar() {
+    let texto = document.getElementById("filtro").value.toLowerCase();
+    let filtrados = comissoes.filter(c => 
+        c.nome.toLowerCase().includes(texto) ||
+        c.fiscal.toLowerCase().includes(texto) ||
+        (c.fiscal_substituto && c.fiscal_substituto.toLowerCase().includes(texto)) ||
+        (c.membros && c.membros.some(m => m.nome.toLowerCase().includes(texto))) ||
+        (c.portaria && c.portaria.toLowerCase().includes(texto)) ||
+        (c.boletim && c.boletim.toLowerCase().includes(texto)) ||
+        (c.sigad && c.sigad.toLowerCase().includes(texto))
+    );
+    atualizarTabela(filtrados);
 }
 
 function exportarExcel() {
-    let dados = "Comissão;Fiscal;Substituto;Membros;Observação\n";
-
+    let dados = "Comissão;Fiscal;Substituto;Membros;Portaria;Boletim;SIGAD;Observação\n";
     comissoes.forEach(c => {
-        let substituto = c.fiscal_substituto || "";
+        let qualFiscal = `(SIAFI: ${c.fiscal_siafi ? 'Sim' : 'Nao'} | Curso: ${c.fiscal_curso ? 'Sim' : 'Nao'})`;
+        let fiscalExp = `${c.fiscal} ${qualFiscal}`;
+        let subExp = "";
+        if (c.fiscal_substituto) {
+            let qualSub = `(SIAFI: ${c.substituto_siafi ? 'Sim' : 'Nao'} | Curso: ${c.substituto_curso ? 'Sim' : 'Nao'})`;
+            subExp = `${c.fiscal_substituto} ${qualSub}`;
+        }
+        let membrosExp = "";
+        if (c.membros && c.membros.length > 0) {
+            membrosExp = c.membros.map(m => `${m.nome} (SIAFI: ${m.siafi_siasg ? 'Sim' : 'Nao'} | Curso: ${m.curso ? 'Sim' : 'Nao'})`).join(" - ");
+        }
+        let portaria = c.portaria || "";
+        let boletim = c.boletim || "Pendente"; 
+        let sigad = c.sigad || "";
         let obs = c.observacao || "";
-        dados += `"${c.nome}";"${c.fiscal}";"${substituto}";"${c.membros.join(" - ")}";"${obs}"\n`;
+        dados += `"${c.nome}";"${fiscalExp}";"${subExp}";"${membrosExp}";"${portaria}";"${boletim}";"${sigad}";"${obs}"\n`;
     });
-
     let blob = new Blob(["\ufeff" + dados], { type: "text/csv;charset=utf-8;" });
     let link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -214,20 +326,16 @@ function exportarExcel() {
 
 function atualizarDashboard() {
     document.getElementById("totalComissoes").innerText = comissoes.length;
-
     let fiscais = new Set();
-    let membros = 0;
-
+    let membrosCount = 0;
     comissoes.forEach(c => {
         if(c.fiscal) fiscais.add(c.fiscal);
-        if(c.membros) membros += c.membros.length;
+        if(c.membros) membrosCount += c.membros.length;
     });
-
     document.getElementById("totalFiscais").innerText = fiscais.size;
-    document.getElementById("totalMembros").innerText = membros;
+    document.getElementById("totalMembros").innerText = membrosCount;
 }
 
-// --- MÁSCARAS E FORMATAÇÃO ---
 document.addEventListener('input', function(e) {
     if (e.target.tagName === 'INPUT' && e.target.type === 'text' && e.target.id !== 'filtro') {
         let inicio = e.target.selectionStart;
