@@ -2,43 +2,35 @@ const banco = supabase.createClient(supabaseUrl, supabaseKey);
 
 // --- SISTEMA DE AUTENTICAÇÃO REAL ---
 
-// 1. Verifica se você já está logado quando abre a página
 async function verificarSessao() {
     const { data: { session } } = await banco.auth.getSession();
     
     if (session) {
-        // Se já tiver uma sessão ativa, pula o login direto
         document.getElementById("loginScreen").style.display = "none";
         document.getElementById("appContent").style.display = "block";
         carregarComissoes(); 
     }
 }
-// Roda a verificação assim que o código carrega
 verificarSessao();
 
-// 2. Função de Fazer Login na Nuvem
 async function fazerLogin() {
     let emailDigitado = document.getElementById("emailLogin").value;
     let senhaDigitada = document.getElementById("senhaLogin").value;
     let erro = document.getElementById("erroLogin");
     let btnEntrar = document.getElementById("btnEntrar");
 
-    // Mostra que está carregando
     btnEntrar.innerText = "Verificando...";
 
-    // Conecta no Supabase e tenta logar
     const { data, error } = await banco.auth.signInWithPassword({
         email: emailDigitado,
         password: senhaDigitada,
     });
 
-    btnEntrar.innerText = "Entrar"; // Volta o texto ao normal
+    btnEntrar.innerText = "Entrar"; 
 
     if (error) {
-        // Se a senha estiver errada
         erro.style.display = "block";
     } else {
-        // Se deu certo, entra no sistema
         erro.style.display = "none";
         document.getElementById("loginScreen").style.display = "none";
         document.getElementById("appContent").style.display = "block";
@@ -46,20 +38,14 @@ async function fazerLogin() {
     }
 }
 
-// 3. Função para Sair do Sistema
 async function fazerLogout() {
     await banco.auth.signOut();
-    
-    // Esconde o painel e mostra o login novamente
     document.getElementById("appContent").style.display = "none";
     document.getElementById("loginScreen").style.display = "flex";
-    
-    // Limpa os campos de senha
     document.getElementById("emailLogin").value = "";
     document.getElementById("senhaLogin").value = "";
 }
 
-// Permite dar 'Enter' tanto no campo de email quanto no de senha para logar
 document.getElementById("emailLogin").addEventListener("keypress", function(event) {
     if (event.key === "Enter") fazerLogin();
 });
@@ -83,7 +69,7 @@ async function carregarComissoes() {
 
 async function salvarComissao() {
     let btnSalvar = document.querySelector('button[onclick="salvarComissao()"]');
-    btnSalvar.innerText = "Salvando..."; // Feedback visual de carregamento
+    btnSalvar.innerText = "Salvando..."; 
 
     let nome = document.getElementById("nomeComissao").value;
     let fiscal = document.getElementById("fiscal").value;
@@ -97,16 +83,14 @@ async function salvarComissao() {
     let boletim = document.getElementById("boletim").value;
     let sigad = document.getElementById("sigad").value;
 
-    // --- LÓGICA DE UPLOAD DA PORTARIA ---
     let inputArquivo = document.getElementById("arquivoPortaria");
     let arquivo = inputArquivo.files[0];
     let caminhoNoStorage = null;
 
     if (arquivo) {
-        // Limpa o nome do arquivo: tira acentos, espaços e caracteres especiais
         const nomeLimpo = arquivo.name
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove os acentos
-            .replace(/[^a-zA-Z0-9.-]/g, "_"); // Troca espaços e caracteres estranhos por underline (_)
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+            .replace(/[^a-zA-Z0-9.-]/g, "_"); 
 
         const nomeArquivoUnico = `${Date.now()}_${nomeLimpo}`;
         
@@ -115,9 +99,9 @@ async function salvarComissao() {
         if (error) {
             alert("Erro ao enviar o arquivo PDF: " + error.message);
             btnSalvar.innerText = "Salvar Comissão";
-            return; // Interrompe se o upload falhar
+            return; 
         }
-        caminhoNoStorage = data.path; // Guarda o caminho para salvar na tabela
+        caminhoNoStorage = data.path; 
     }
 
     let membrosGroups = document.querySelectorAll(".membro-group");
@@ -147,9 +131,9 @@ async function salvarComissao() {
         sigad: sigad
     };
 
-    // Só atualiza a coluna do arquivo se um novo arquivo foi enviado
+    // CORREÇÃO AQUI: Mudando de arquivo_url para portaria_path
     if (caminhoNoStorage) {
-        dadosComissao.arquivo_url = caminhoNoStorage;
+        dadosComissao.portaria_path = caminhoNoStorage;
     }
 
     if(editandoId !== null) {
@@ -161,17 +145,16 @@ async function salvarComissao() {
 
     limparCampos();
     await carregarComissoes(); 
-    btnSalvar.innerText = "Salvar Comissão"; // Retorna o botão ao texto normal
+    btnSalvar.innerText = "Salvar Comissão"; 
 }
 
-// --- FUNÇÃO PARA BAIXAR/ABRIR A PORTARIA ---
 async function baixarPortaria(path) {
     const { data, error } = await banco.storage.from('portarias').createSignedUrl(path, 60);
     
     if (error) {
         alert("Erro ao abrir o arquivo: " + error.message);
     } else if (data) {
-        window.open(data.signedUrl, '_blank'); // Abre o PDF em uma nova aba
+        window.open(data.signedUrl, '_blank'); 
     }
 }
 
@@ -253,13 +236,12 @@ function atualizarTabela(lista = comissoes) {
             }
         }
 
-        // --- EXIBIÇÃO DA PORTARIA (Apenas texto) ---
         let portariaExibicao = c.portaria || "-";
 
-        // --- LÓGICA DO BOTÃO DE BAIXAR NAS AÇÕES ---
+        // CORREÇÃO AQUI: Mudando de arquivo_url para portaria_path
         let botaoBaixar = "";
-        if (c.arquivo_url) {
-            botaoBaixar = `<button onclick="baixarPortaria('${c.arquivo_url}')" style="background-color: #198754; margin-bottom: 4px;">Baixar PDF</button>`;
+        if (c.portaria_path) {
+            botaoBaixar = `<button onclick="baixarPortaria('${c.portaria_path}')" style="background-color: #198754; margin-bottom: 4px;">Baixar PDF</button>`;
         }
 
         let linha = `
@@ -296,7 +278,7 @@ function editar(index) {
     document.getElementById("boletim").value = c.boletim || "";
     document.getElementById("sigad").value = c.sigad || "";
     document.getElementById("observacao").value = c.observacao || "";
-    document.getElementById("arquivoPortaria").value = ""; // Limpa o input de arquivo ao editar
+    document.getElementById("arquivoPortaria").value = ""; 
 
     let container = document.getElementById("membrosContainer");
     container.innerHTML = ""; 
@@ -332,7 +314,7 @@ function limparCampos() {
     document.getElementById("boletim").value = "";
     document.getElementById("sigad").value = "";
     document.getElementById("observacao").value = "";
-    document.getElementById("arquivoPortaria").value = ""; // Limpa o campo do arquivo
+    document.getElementById("arquivoPortaria").value = ""; 
     
     let container = document.getElementById("membrosContainer");
     container.innerHTML = "";
