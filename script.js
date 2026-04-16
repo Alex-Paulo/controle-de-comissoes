@@ -103,7 +103,13 @@ async function salvarComissao() {
     let caminhoNoStorage = null;
 
     if (arquivo) {
-        const nomeArquivoUnico = `${Date.now()}_${arquivo.name}`;
+        // Limpa o nome do arquivo: tira acentos, espaços e caracteres especiais
+        const nomeLimpo = arquivo.name
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove os acentos
+            .replace(/[^a-zA-Z0-9.-]/g, "_"); // Troca espaços e caracteres estranhos por underline (_)
+
+        const nomeArquivoUnico = `${Date.now()}_${nomeLimpo}`;
+        
         const { data, error } = await banco.storage.from('portarias').upload(nomeArquivoUnico, arquivo);
         
         if (error) {
