@@ -253,10 +253,13 @@ function atualizarTabela(lista = comissoes) {
             }
         }
 
-        // --- EXIBIÇÃO DA PORTARIA E BOTÃO DE DOWNLOAD ---
+        // --- EXIBIÇÃO DA PORTARIA (Apenas texto) ---
         let portariaExibicao = c.portaria || "-";
+
+        // --- LÓGICA DO BOTÃO DE BAIXAR NAS AÇÕES ---
+        let botaoBaixar = "";
         if (c.arquivo_url) {
-            portariaExibicao += `<br><button onclick="baixarPortaria('${c.arquivo_url}')" style="background: var(--primary); color: white; padding: 4px 8px; font-size: 0.75em; border: none; border-radius: 4px; margin-top: 5px; cursor: pointer;">Baixar PDF</button>`;
+            botaoBaixar = `<button onclick="baixarPortaria('${c.arquivo_url}')" style="background-color: #198754; margin-bottom: 4px;">Baixar PDF</button>`;
         }
 
         let linha = `
@@ -269,7 +272,8 @@ function atualizarTabela(lista = comissoes) {
             <td style="vertical-align: top;">${boletimExibicao}</td>
             <td style="vertical-align: top;">${c.sigad || "-"}</td>
             <td style="vertical-align: top;">${c.observacao || "-"}</td>
-            <td class="acoes" style="vertical-align: top;">
+            <td class="acoes" style="vertical-align: top; min-width: 100px;">
+                ${botaoBaixar}
                 <button class="btn-editar" onclick="editar(${index})">Editar</button>
                 <button class="btn-excluir" onclick="excluir(${c.id})">Excluir</button>
             </td>
