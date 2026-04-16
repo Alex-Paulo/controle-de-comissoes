@@ -68,7 +68,7 @@ document.getElementById("senhaLogin").addEventListener("keypress", function(even
 });
 
 
-// --- RESTANTE DO SISTEMA (MANTIDO INTACTO) ---
+// --- RESTANTE DO SISTEMA ---
 
 let comissoes = [];
 let editandoId = null; 
@@ -82,6 +82,9 @@ async function carregarComissoes() {
 }
 
 async function salvarComissao() {
+    let btnSalvar = document.querySelector('button[onclick="salvarComissao()"]');
+    btnSalvar.innerText = "Salvando..."; // Feedback visual de carregamento
+
     let nome = document.getElementById("nomeComissao").value;
     let fiscal = document.getElementById("fiscal").value;
     let fiscalSiafi = document.getElementById("fiscalSiafi").checked;
@@ -93,6 +96,23 @@ async function salvarComissao() {
     let portaria = document.getElementById("portaria").value;
     let boletim = document.getElementById("boletim").value;
     let sigad = document.getElementById("sigad").value;
+
+    // --- LÓGICA DE UPLOAD DA PORTARIA ---
+    let inputArquivo = document.getElementById("arquivoPortaria");
+    let arquivo = inputArquivo.files[0];
+    let caminhoNoStorage = null;
+
+    if (arquivo) {
+        const nomeArquivoUnico = `${Date.now()}_${arquivo.name}`;
+        const { data, error } = await banco.storage.from('portarias').upload(nomeArquivoUnico, arquivo);
+        
+        if (error) {
+            alert("Erro ao enviar o arquivo PDF: " + error.message);
+            btnSalvar.innerText = "Salvar Comissão";
+            return; // Interrompe se o upload falhar
+        }
+        caminhoNoStorage = data.path; // Guarda o caminho para salvar na tabela
+    }
 
     let membrosGroups = document.querySelectorAll(".membro-group");
     let membros = [];
@@ -121,6 +141,11 @@ async function salvarComissao() {
         sigad: sigad
     };
 
+    // Só atualiza a coluna do arquivo se um novo arquivo foi enviado
+    if (caminhoNoStorage) {
+        dadosComissao.arquivo_url = caminhoNoStorage;
+    }
+
     if(editandoId !== null) {
         await banco.from('comissoes').update(dadosComissao).eq('id', editandoId);
         editandoId = null;
@@ -130,6 +155,18 @@ async function salvarComissao() {
 
     limparCampos();
     await carregarComissoes(); 
+    btnSalvar.innerText = "Salvar Comissão"; // Retorna o botão ao texto normal
+}
+
+// --- FUNÇÃO PARA BAIXAR/ABRIR A PORTARIA ---
+async function baixarPortaria(path) {
+    const { data, error } = await banco.storage.from('portarias').createSignedUrl(path, 60);
+    
+    if (error) {
+        alert("Erro ao abrir o arquivo: " + error.message);
+    } else if (data) {
+        window.open(data.signedUrl, '_blank'); // Abre o PDF em uma nova aba
+    }
 }
 
 async function excluir(id) {
@@ -210,13 +247,19 @@ function atualizarTabela(lista = comissoes) {
             }
         }
 
+        // --- EXIBIÇÃO DA PORTARIA E BOTÃO DE DOWNLOAD ---
+        let portariaExibicao = c.portaria || "-";
+        if (c.arquivo_url) {
+            portariaExibicao += `<br><button onclick="baixarPortaria('${c.arquivo_url}')" style="background: var(--primary); color: white; padding: 4px 8px; font-size: 0.75em; border: none; border-radius: 4px; margin-top: 5px; cursor: pointer;">Baixar PDF</button>`;
+        }
+
         let linha = `
         <tr>
             <td style="vertical-align: top;"><strong>${c.nome}</strong></td>
             <td style="vertical-align: top;">${fiscalExibicao}</td>
             <td style="vertical-align: top;">${substitutoExibicao}</td>
             <td style="vertical-align: top;">${membrosExibicao}</td>
-            <td style="vertical-align: top;">${c.portaria || "-"}</td>
+            <td style="vertical-align: top;">${portariaExibicao}</td>
             <td style="vertical-align: top;">${boletimExibicao}</td>
             <td style="vertical-align: top;">${c.sigad || "-"}</td>
             <td style="vertical-align: top;">${c.observacao || "-"}</td>
@@ -243,6 +286,7 @@ function editar(index) {
     document.getElementById("boletim").value = c.boletim || "";
     document.getElementById("sigad").value = c.sigad || "";
     document.getElementById("observacao").value = c.observacao || "";
+    document.getElementById("arquivoPortaria").value = ""; // Limpa o input de arquivo ao editar
 
     let container = document.getElementById("membrosContainer");
     container.innerHTML = ""; 
@@ -278,6 +322,8 @@ function limparCampos() {
     document.getElementById("boletim").value = "";
     document.getElementById("sigad").value = "";
     document.getElementById("observacao").value = "";
+    document.getElementById("arquivoPortaria").value = ""; // Limpa o campo do arquivo
+    
     let container = document.getElementById("membrosContainer");
     container.innerHTML = "";
     adicionarMembro();
