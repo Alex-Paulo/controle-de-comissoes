@@ -6,155 +6,195 @@
     <title>Controle de Comissões</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .form-section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eaeaea; }
-        .form-section:last-child { border-bottom: none; padding-bottom: 0; }
-        .form-section h3 { color: #444; font-size: 1.1em; margin-top: 0; margin-bottom: 15px; }
-        .militar-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; background: #fdfdfd; border: 1px solid #e0e0e0; padding: 10px 15px; border-radius: 6px; margin-bottom: 10px; transition: all 0.2s; }
-        .militar-row:hover { border-color: #bbb; background: #f9f9f9; }
-        .militar-row input[type="text"] { flex: 1; margin: 0 !important; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        .checkbox-group { display: flex; gap: 15px; min-width: 220px; }
-        .checkbox-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85em; color: #555; font-weight: bold; }
-        .btn-outline { background: transparent; color: #0056b3; border: 1px dashed #0056b3; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-outline:hover { background: #f0f8ff; }
-        .input-linha { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 15px; }
-        .doc-row { display: flex; gap: 15px; }
-        .doc-row input { flex: 1; }
+        /* ESTILOS APRIMORADOS - DESIGN MAIS PROFISSIONAL */
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        /* --- ESTILOS COMPACTOS PARA A TABELA --- */
-        table th { background: #f4f6f9; color: #495057; text-transform: uppercase; font-size: 0.8em; letter-spacing: 0.5px; border-bottom: 2px solid #dee2e6; padding: 10px 8px; }
-        table td { padding: 10px 8px; font-size: 0.85em; border-bottom: 1px solid #eee; }
-        .militar-container { display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; border-bottom: 1px dashed #f0f0f0; padding-bottom: 4px; }
-        .militar-container:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
-        .militar-nome { font-weight: 600; color: #2c3e50; }
-        .badges-container { display: flex; gap: 4px; }
-        .badge { font-size: 0.65em; padding: 3px 5px; border-radius: 4px; font-weight: bold; letter-spacing: 0.5px; }
-        .badge.sim { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .badge.nao { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .app-header { background: #003366; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .app-header h1 { margin: 0; font-size: 1.5em; letter-spacing: 1px; }
         
-        .membros-lista { max-height: 100px; overflow-y: auto; padding-right: 5px; }
-        .membros-lista::-webkit-scrollbar { width: 4px; }
-        .membros-lista::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        .membros-lista::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        .card-dash { background: white; padding: 20px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; flex: 1; border-top: 4px solid #0056b3; }
+        .card-dash span { display: block; font-size: 1.8em; color: #0056b3; margin-top: 5px; }
 
-        .acoes button { padding: 5px 10px; font-size: 0.85em; margin-right: 5px; border-radius: 4px; border: none; cursor: pointer; color: white; font-weight: bold; }
+        /* GRID PARA O FORMULÁRIO (DUAS COLUNAS) */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        @media (max-width: 850px) { .form-grid { grid-template-columns: 1fr; } }
+        
+        .form-section { margin-bottom: 20px; background: #fafafa; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef; }
+        .form-section h3 { color: #003366; font-size: 1.05em; margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid #e9ecef; padding-bottom: 5px; text-transform: uppercase; }
+        
+        .militar-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; background: white; border: 1px solid #dee2e6; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+        .militar-row input[type="text"] { flex: 1; margin: 0 !important; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; min-width: 180px; }
+        .checkbox-group label { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.8em; color: #495057; font-weight: bold; }
+        
+        .btn-outline { background: transparent; color: #0056b3; border: 1px dashed #0056b3; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; width: 100%; margin-top: 5px; }
+        .btn-outline:hover { background: #e6f2ff; }
+        .input-linha { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; }
+        .doc-row { display: flex; gap: 10px; }
+        .doc-row input { flex: 1; }
+
+        /* TABELA E PAGINAÇÃO */
+        .tabela-section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin: 0 auto 40px auto; max-width: 95%; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        table th { background: #003366; color: white; text-transform: uppercase; font-size: 0.8em; padding: 12px 10px; }
+        table td { padding: 12px 10px; font-size: 0.85em; border-bottom: 1px solid #eee; }
+        table tr:hover { background-color: #f8f9fa; }
+        
+        .acoes button { padding: 5px 8px; font-size: 0.8em; margin-right: 3px; border-radius: 4px; border: none; cursor: pointer; color: white; font-weight: bold; }
         .btn-editar { background-color: #0d6efd; margin-bottom: 4px;}
         .btn-editar:hover { background-color: #0b5ed7; }
         .btn-excluir { background-color: #dc3545; }
         .btn-excluir:hover { background-color: #bb2d3b; }
+        .badge { font-size: 0.65em; padding: 3px 5px; border-radius: 4px; font-weight: bold; }
+        .badge.sim { background-color: #d4edda; color: #155724; }
+        .badge.nao { background-color: #f8d7da; color: #721c24; }
+        .militar-container { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px dashed #eee; }
+
+        /* ESTILOS DA PAGINAÇÃO */
+        .paginacao-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 25px; }
+        .paginacao-container button { padding: 8px 14px; border: 1px solid #0056b3; background: white; color: #0056b3; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .paginacao-container button:hover:not(:disabled) { background: #e6f2ff; }
+        .paginacao-container button.ativo { background: #0056b3; color: white; }
+        .paginacao-container button:disabled { border-color: #ccc; color: #aaa; cursor: not-allowed; background: #f9f9f9; }
+        .info-paginacao { text-align: center; font-size: 0.85em; color: #666; margin-top: 10px; font-weight: bold; }
+
+        /* ESTILOS DOS BOTÕES DE FILTRO RÁPIDO */
+        .btn-filtro { padding: 6px 12px; border: 1px solid #ccc; border-radius: 20px; cursor: pointer; background: white; font-size: 0.85em; font-weight: bold; transition: all 0.2s; }
+        .btn-filtro:hover { background: #f1f1f1; }
+        .btn-filtro.ativo { background: #003366; color: white; border-color: #003366; }
     </style>
 </head>
 <body>
 
     <div id="loginScreen" class="login-container">
-        <div class="login-box">
-            <h2>Acesso Restrito</h2>
-            <p>Insira suas credenciais para acessar</p>
-            <input type="email" id="emailLogin" placeholder="Seu E-mail" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-            <input type="password" id="senhaLogin" placeholder="••••••" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-            <button id="btnEntrar" onclick="fazerLogin()" style="width: 100%; padding: 10px; background: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Entrar</button>
+        <div class="login-box" style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin: 100px auto; text-align: center;">
+            <h2 style="color: #003366;">Acesso Restrito</h2>
+            <p style="color: #666;">Insira suas credenciais para acessar</p>
+            <input type="email" id="emailLogin" placeholder="Seu E-mail" class="input-linha">
+            <input type="password" id="senhaLogin" placeholder="••••••" class="input-linha">
+            <button id="btnEntrar" onclick="fazerLogin()" style="width: 100%; padding: 12px; background: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px;">Entrar</button>
             <p id="erroLogin" style="color: red; display: none; margin-top: 15px; font-weight: bold;">E-mail ou senha incorretos!</p>
-            <p style="margin-top: 20px; font-size: 0.9em; color: #666;">Sistema criado por<br><strong>3s QScon Alex Moreira</strong></p>
+            <p style="margin-top: 25px; font-size: 0.85em; color: #888;">Sistema desenvolvido por<br><strong style="color: #555;">3s QScon Alex Moreira</strong></p>
         </div>
     </div>
 
     <div id="appContent" style="display: none;">
         
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; max-width: 850px; margin-left: auto; margin-right: auto; padding: 0 10px;">
-            <h1 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.7); margin: 0;">Controle de Comissões</h1>
-            <button onclick="fazerLogout()" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">Sair do Sistema</button>
+        <header class="app-header">
+            <h1>Controle de Comissões e Portarias</h1>
+            <button onclick="fazerLogout()" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Sair do Sistema</button>
         </header>
 
-        <div class="dashboard" style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; margin-bottom: 20px;">
-            <div class="card" style="background: white; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                Total Comissões: <span id="totalComissoes">0</span>
-            </div>
-            <div class="card" style="background: white; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                Total Fiscais: <span id="totalFiscais">0</span>
-            </div>
-            <div class="card" style="background: white; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                Total Membros: <span id="totalMembros">0</span>
-            </div>
-        </div>
-
-        <div class="form-container" style="background: white; padding: 30px; border-radius: 8px; max-width: 850px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-            <div class="form-section">
-                <h3>Informações da Comissão</h3>
-                <input type="text" id="nomeComissao" class="input-linha" placeholder="Nome da Comissão">
+        <div style="max-width: 1100px; margin: 0 auto; padding: 0 15px;">
+            <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 25px; flex-wrap: wrap;">
+                <div class="card-dash">Total de Comissões<br><span id="totalComissoes">0</span></div>
+                <div class="card-dash">Fiscais Cadastrados<br><span id="totalFiscais">0</span></div>
+                <div class="card-dash">Membros Envolvidos<br><span id="totalMembros">0</span></div>
             </div>
 
-            <div class="form-section">
-                <h3>Equipe de Fiscalização</h3>
-                <div class="militar-row">
-                    <input type="text" id="fiscal" placeholder="Nome do Fiscal Titular">
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="fiscalSiafi"> SIAFI/SIASG</label>
-                        <label><input type="checkbox" id="fiscalCurso"> Tem Curso</label>
-                    </div>
-                </div>
-                <div class="militar-row">
-                    <input type="text" id="fiscalSubstituto" placeholder="Nome do Fiscal Substituto (Opcional)">
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="substitutoSiafi"> SIAFI/SIASG</label>
-                        <label><input type="checkbox" id="substitutoCurso"> Tem Curso</label>
-                    </div>
-                </div>
-                
-                <h3 style="margin-top: 20px; font-size: 1em; color: #666;">Membros da Comissão</h3>
-                <div id="membrosContainer">
-                    <div class="militar-row membro-group">
-                        <input type="text" class="membro-nome" placeholder="Nome do Membro">
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" class="membro-siafi"> SIAFI/SIASG</label>
-                            <label><input type="checkbox" class="membro-curso"> Tem Curso</label>
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 30px;">
+                <div class="form-grid">
+                    
+                    <div>
+                        <div class="form-section">
+                            <h3>Informações Básicas</h3>
+                            <input type="text" id="nomeComissao" class="input-linha" placeholder="Nome ou Objeto da Comissão">
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Documentação e Observações</h3>
+                            <div class="doc-row">
+                                <input type="text" id="portaria" class="input-linha" placeholder="Nº da Portaria">
+                                <input type="text" id="boletim" class="input-linha" placeholder="Boletim">
+                            </div>
+                            <input type="text" id="sigad" class="input-linha" placeholder="Nº SIGAD">
+                            
+                            <div style="background: #fff; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px;">
+                                <label for="arquivoPortaria" style="font-size: 0.85em; color: #555; display: block; margin-bottom: 5px;"><strong>Anexar PDF da Portaria:</strong></label>
+                                <input type="file" id="arquivoPortaria" accept="application/pdf" style="width: 100%; font-size: 0.85em;">
+                            </div>
+
+                            <input type="text" id="observacao" class="input-linha" placeholder="Observações Gerais (Opcional)">
                         </div>
                     </div>
-                </div>
-                <button onclick="adicionarMembro()" class="btn-outline">+ Adicionar outro Membro</button>
-            </div>
 
-            <div class="form-section">
-                <h3>Documentação e Observações</h3>
-                <div class="doc-row">
-                    <input type="text" id="portaria" class="input-linha" placeholder="Nº da Portaria">
-                    <input type="text" id="boletim" class="input-linha" placeholder="Boletim">
-                    <input type="text" id="sigad" class="input-linha" placeholder="Nº SIGAD">
+                    <div>
+                        <div class="form-section" style="height: 100%;">
+                            <h3>Equipe de Fiscalização e Membros</h3>
+                            
+                            <label style="font-size: 0.85em; color: #555; font-weight: bold;">Fiscalização Oficial</label>
+                            <div class="militar-row" style="margin-top: 5px;">
+                                <input type="text" id="fiscal" placeholder="Fiscal Titular">
+                                <div class="checkbox-group">
+                                    <label><input type="checkbox" id="fiscalSiafi"> SIAFI</label>
+                                    <label><input type="checkbox" id="fiscalCurso"> CURSO</label>
+                                </div>
+                            </div>
+                            <div class="militar-row">
+                                <input type="text" id="fiscalSubstituto" placeholder="Fiscal Substituto (Opcional)">
+                                <div class="checkbox-group">
+                                    <label><input type="checkbox" id="substitutoSiafi"> SIAFI</label>
+                                    <label><input type="checkbox" id="substitutoCurso"> CURSO</label>
+                                </div>
+                            </div>
+                            
+                            <label style="font-size: 0.85em; color: #555; font-weight: bold; margin-top: 15px; display: block;">Membros da Comissão</label>
+                            <div id="membrosContainer" style="margin-top: 5px; max-height: 200px; overflow-y: auto; padding-right: 5px;">
+                                <div class="militar-row membro-group">
+                                    <input type="text" class="membro-nome" placeholder="Nome do Membro">
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" class="membro-siafi"> SIAFI</label>
+                                        <label><input type="checkbox" class="membro-curso"> CURSO</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="adicionarMembro()" class="btn-outline">+ Adicionar Novo Membro</button>
+                        </div>
+                    </div>
+
                 </div>
                 
-                <div style="margin-bottom: 15px; text-align: left;">
-                    <label for="arquivoPortaria" style="margin-top: 0; font-size: 0.85em; color: #555;">Anexar Arquivo da Portaria (PDF):</label>
-                    <input type="file" id="arquivoPortaria" class="input-linha" accept="application/pdf" style="padding: 8px;">
-                </div>
-
-                <input type="text" id="observacao" class="input-linha" placeholder="Observações Gerais (Opcional)">
+                <button onclick="salvarComissao()" style="width: 100%; padding: 15px; background: #003366; color: white; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; font-weight: bold; margin-top: 15px; transition: 0.2s;">
+                    Salvar Comissão no Sistema
+                </button>
             </div>
-            
-            <button onclick="salvarComissao()" style="width: 100%; padding: 15px; background: #0056b3; color: white; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; font-weight: bold; transition: 0.2s;">
-                Salvar Comissão
-            </button>
         </div>
 
-        <div class="tabela-section" style="max-width: 95%; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; overflow-x: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                <input type="text" id="filtro" placeholder="Buscar..." onkeyup="filtrar()" style="padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 4px;">
-                <button onclick="exportarExcel()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Exportar para Excel</button>
+        <div class="tabela-section">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <input type="text" id="filtro" placeholder="Pesquisar comissão, militar ou portaria..." onkeyup="filtrar()" style="padding: 10px; width: 350px; border: 1px solid #ccc; border-radius: 4px;">
+                <button onclick="exportarExcel()" style="padding: 10px 20px; background: #198754; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Baixar Relatório Excel</button>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                <thead>
-                    <tr>
-                        <th>Comissão</th>
-                        <th>Fiscal</th>
-                        <th>Substituto</th>
-                        <th style="min-width: 180px;">Membros</th>
-                        <th>Portaria</th>
-                        <th>Boletim</th>
-                        <th>SIGAD</th>
-                        <th>Observações</th>
-                        <th style="min-width: 90px;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="listaComissoes"></tbody>
-            </table>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                <button onclick="aplicarFiltroRapido('todos')" id="btnFiltroTodos" class="btn-filtro ativo">Todos</button>
+                <button onclick="aplicarFiltroRapido('atrasados')" id="btnFiltroAtrasados" class="btn-filtro">🔴 Atrasados</button>
+                <button onclick="aplicarFiltroRapido('sem_portaria')" id="btnFiltroPortaria" class="btn-filtro">📄 Sem Portaria</button>
+                <button onclick="aplicarFiltroRapido('pendentes')" id="btnFiltroPendentes" class="btn-filtro">⏳ Aguardando Boletim</button>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="min-width: 150px;">Comissão / Objeto</th>
+                            <th style="min-width: 130px;">Fiscal</th>
+                            <th style="min-width: 130px;">Substituto</th>
+                            <th style="min-width: 180px;">Membros</th>
+                            <th style="min-width: 80px;">Portaria</th>
+                            <th style="min-width: 110px;">Boletim</th>
+                            <th style="min-width: 90px;">SIGAD</th>
+                            <th style="min-width: 140px;">Observações</th>
+                            <th style="min-width: 120px; text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaComissoes"></tbody>
+                </table>
+            </div>
+
+            <div id="paginacao" class="paginacao-container"></div>
+            <div id="infoPaginacao" class="info-paginacao"></div>
+
         </div>
     </div>
 
